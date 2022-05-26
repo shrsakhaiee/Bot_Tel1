@@ -1,7 +1,5 @@
-from email.mime import message
 import telebot
 import random
-from telebot import types
 from gtts import gTTS
 import qrcode
 
@@ -13,9 +11,16 @@ def send_welcome(message):
 
 @bot.message_handler(commands=['help'])
 def send_welcome(message):
-    bot.reply_to(message,"چیکار میتونم برات بکنم؟🤗")
+    bot.send_message(message.chat.id, """
+    سلام به ربات من خوش اومدی
+    جهت محاسبه سن → /age
+    برای شروع بازی → /newgame
+    برای دریافت فال → /fal
+    برای تبدیل متن به کیوآر → /qr
+    و برای تبدیل متن به صدا → /voice
+    رو کلیک کن.""")
 
-    
+
 @bot.message_handler(commands=['qrcode'])
 def creat_qr(message):
     qrcode = bot.send_message(message.chat.id, 'متن را وارد کن ')
@@ -26,20 +31,21 @@ def sendqr(message):
     photo = open('qrcode.png','rb')
     bot.send_photo(message.chat.id, photo)
 
-@bot.message_handler(commands=['NewGame'])
-def gaming(message):
-    game = bot.send_message(message,"انتخاب کن یه عدد بین 1 تا 50 :")  
-    bot.register_next_step_handler(game, bazi)
-    
-def bazi(message):
-    rdm = random.randint(0,50)
-    s = int(message.text)
-    if rdm == s:
-        bot.reply_to(message,'درست گفتی')
-    elif s < rdm:
-        bot.reply_to(message,'برو بالا')
-    elif s > rdm:
-        bot.reply_to(message,'برو پایین')
+@bot.message_handler(commands=['newgame'])
+def start_message(message):
+  game = random.randint(1,30)
+  game_message = bot.send_message(message.chat.id,"به بازی حدس عدد خوش اومدی، بین عدد 1 تا 30 حدس بزن")
+
+  @bot.message_handler(func= lambda m: True)
+  def guess(message):
+    pc_num = int(message.text)
+    if game == pc_num:
+      bot.reply_to(message,'دمت گرم درست حدس زدی')
+    elif pc_num < game:
+      bot.reply_to(message,'برو بالا')
+    elif pc_num > game:
+      bot.reply_to(message,'بیا پایین')
+
 
 @bot.message_handler(commands =['voice'])
 def voice_s(message):
@@ -50,7 +56,7 @@ def voice_send(message):
     myobj.save('file.mp3')
     voice = open('file.mp3', 'rb')
     bot.send_voice(message.chat.id, voice)
-    
+
 
 
 @bot.message_handler(commands =['age'])
